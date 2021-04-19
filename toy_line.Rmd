@@ -7,6 +7,22 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, include=FALSE}
+library(tidyverse)
+library(skimr)        ## install.packages("skimr")
+library(dplyr)
+
+# ALT plus hypen = <- (within chunk)
+# ctrl plus shift plus m = %>% 
+# ctrl + ALT + I = insert chunk
+# filter rows, select columns
+
+```
+
+
+```{r}
+
+```
 
 
 ```{r cars}

@@ -1,0 +1,50 @@
+---
+title: "practice_1"
+author: "Peter Smallidge"
+output: github_document
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(skimr)        ## install.packages("skimr")
+library(dplyr)
+
+# ALT plus hypen = <- (within chunk)
+# ctrl plus shift plus m = %>% 
+# ctrl + ALT + I = insert chunk
+# filter rows, select columns
+
+```
+
+
+
+<!-- 
+use this code for comments between chunks
+-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Tutorial Practice
+### Header Format
+
+**bold** <br>
+*italics*
+
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

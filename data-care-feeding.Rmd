@@ -1,0 +1,133 @@
+---
+title: "Data Care and Feeding"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- 
+use this code for comments between chunks
+-->
+
+```{r, Installing Libraries}
+
+library(tidyverse)
+library(skimr)        ## install.packages("skimr")
+#  this is part of tidyverse -- library(dplyr)
+
+library(gapminder)  #install.packages("gapminder")
+
+#
+#in console
+#   str(gapminder)
+#   print(gapminder, n=10)
+#   
+#   to make a df into tibble use x1 <- as_tibble(original_df)  
+#   
+#   dim(df) will show dimensions of the df
+#   
+
+#simple plot use base R
+
+
+```
+
+### Simple Plots of Data
+```{r, simple plots of data}
+
+str(gapminder)
+print(gapminder, n=10)
+
+plot(lifeExp ~ year, gapminder)
+plot(lifeExp ~ gdpPercap, gapminder)
+plot(lifeExp ~ log(gdpPercap), gapminder)
+
+hist(gapminder$lifeExp)
+```
+
+### Looking at Variables
+```{r, looking at variables}
+
+hist(gapminder$lifeExp)  #lifeExp is a numeric variable
+summary(gapminder$lifeExp)
+summary(gapminder$year) #year is an integer
+table(gapminder$year)
+
+#factor Data
+summary(gapminder$continent) #continent is a factor
+
+table(gapminder$continent)
+barplot(table(gapminder$continent))
+```
+
+### Demonstration of ggplot
+```{r, Demo of ggplot}
+
+p <- ggplot(filter(gapminder, continent != "Oceania"),
+            aes(x = gdpPercap, y = lifeExp)) # just initializes, creates a base of the data to graph, excludes "Oceania"
+
+p <- p + scale_x_log10() # log the x axis the right way, further defines "p"
+
+p + geom_point() # scatterplot
+
+p + geom_point(aes(color = continent)) # map continent to color as an aesthetic for a new scatterplot, note that Oceania is not in the legend
+
+p + geom_point(alpha = (1/3), size = 3) + geom_smooth(lwd = 1.5, se = FALSE)
+#> `geom_smooth()` using method = 'gam' and formula 'y ~ s(x, bs = "cs")'
+# size = diameter of the point (try 13)
+# alpha = color density of the point, but not sure what it is based on (try 1/13 or 3)
+# lwd = line width
+# se = a cloud to illustrate the standard error
+# 
+#  this would be good code to use with the maple sap data
+
+
+p + geom_point(alpha = (1/3), size = 3) + facet_wrap(~ continent) +
+  geom_smooth(lwd = 1.5, se = FALSE)
+#> `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+```
+
+
+###Filtering Data
+```{r, Filter Data}
+
+filter(gapminder, lifeExp <29)  #retain rows/observations with lifeExp less than 29. if <31, the number of observations increases
+
+filter(gapminder, country == "Rwanda", year > 1979) 
+# selects rows that are both Rwanda and year greater than 1979
+#factor variables are selected within "value", and numeric/integer are not in quotes
+
+filter(gapminder, country == "Rwanda" | year > 1979, lifeExp > 80)
+# selects rows for country = Rwanda or year > 1979...and lifeExp > 80
+# if the symbol | is changed to a comma then the decision is x or y or z
+# if the symbol | is changed to &, the decision is more restrictive
+
+
+
+```
+
+
+### Selecting Data Columns
+```{r}
+
+gapminder %>%  # extract two variables and show the first four rows
+  select(year, lifeExp) %>% 
+  head(4)
+
+str(gapminder) # the output of the above selection does not change the structure of the tibble
+
+
+```
+
+### Single Table dplyr Functions
+```{r}
+
+my_gap <- gapminder
+
+
+```
+
+

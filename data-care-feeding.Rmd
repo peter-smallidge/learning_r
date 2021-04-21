@@ -47,6 +47,7 @@ plot(lifeExp ~ log(gdpPercap), gapminder)
 hist(gapminder$lifeExp)
 ```
 
+
 ### Looking at Variables
 ```{r, looking at variables}
 
@@ -59,7 +60,7 @@ table(gapminder$year)
 summary(gapminder$continent) #continent is a factor
 
 table(gapminder$continent)
-barplot(table(gapminder$continent))
+#barplot(table(gapminder$continent))
 ```
 
 ### Demonstration of ggplot
@@ -111,23 +112,164 @@ filter(gapminder, country == "Rwanda" | year > 1979, lifeExp > 80)
 
 
 ### Selecting Data Columns
-```{r}
+```{r, Selecting Data}
 
 gapminder %>%  # extract two variables and show the first four rows
-  select(year, lifeExp) %>% 
+  select(year, lifeExp) 
+  #select(-continent, -pop)  #this code would retain all variable except continent and pop
   head(4)
 
 str(gapminder) # the output of the above selection does not change the structure of the tibble
 
+gapminder %>% 
+  select(yr = year, lifeExp, gdpPercap) %>%  #renames year as yr
+  select(gdpPercap, everything()) #move gdpPercap to first position, then all other
+
 
 ```
+
 
 ### Single Table dplyr Functions
-```{r}
+```{r, Mutate and Within Tibble Percentages}
 
-my_gap <- gapminder
+my_gap <- gapminder %>%  #mutate defines and inserts new variable into a tibble
+  mutate(gdp = pop * gdpPercap)
+
+canada <- my_gap %>% 
+  filter(country == "Canada") #%>% 
+  filter(!c(country == "Algeria" & year ==1987))
+#the last line makes for an unequal number of levels for Algeria vs. Canada
+#this tests if the next code accounts for that inequality.
+#if the number of levels are not equal, the following code fails.
+
+pct_tibble <- my_gap %>% 
+  #this would be better with a join command
+  mutate(tmp = rep(canada$gdpPercap, nlevels(country)),
+         gdpPercapRel = gdpPercap / tmp)  # use following to drop "tmp"
+   #       ,
+   #      tmp = NULL)
+
+#  in the above code, "rep" is to replicate the gdpPercap of Canada for each of
+#  the number of levels of country. I assume that 
+
+visualize <- pct_tibble %>% 
+  filter(country == "Algeria"| country == "Canada") %>% 
+  filter(year > 1982) %>% 
+  select( -lifeExp, -continent)
+print(visualize, n=15)
+
+
+summary(pct_tibble$gdpPercapRel)
+
 
 
 ```
+
+
+### Arrange (= Sort by)
+```{r, Arranging Data in Sequence}
+
+my_gap %>% 
+  arrange(year, country) #sorts by country within each year
+
+my_gap %>% 
+  filter(year == 2007) %>% 
+  arrange(lifeExp) # retains year = 2007, sorts by life expectancy
+        # low to high
+
+my_gap %>% 
+  filter(year == 2007) %>%  # no " " for numeric
+  arrange(desc(lifeExp)) # same as previous, but high to low
+
+
+```
+
+###Changing Names of Variables
+```{r, Changing names of variables with "rename"}
+
+my_gap %>% #new name = old name
+  rename(
+    life_exp = lifeExp,
+    gdp_percap = gdpPercap
+  )
+```
+
+
+###Group and Summarize
+```{r, Group and Summarize}
+test <- my_gap %>% # this send the output to df=test with two variables
+  group_by(continent) %>% 
+  summarize(
+    n = n()
+  )
+
+test2 <- my_gap %>% # the resultant df is same as above=test
+  count(continent)
+
+
+my_gap %>% 
+  group_by(continent) %>% 
+  summarize(
+    n = n(),
+    n_countries = n_distinct(country) #counts number of countries within a continent
+  )
+
+#calculate the mean life expectancy by continent
+my_gap %>% 
+  group_by(continent) %>% 
+  summarize(
+    avg_life_exp = mean(lifeExp)
+  )
+
+#"summarize_at" applies same statistic to multiple variables
+#compute life exp and GDPpercap by continent and year for 1952 & 2007
+my_gap %>% 
+  filter(year %in% c(1952, 2007)) %>% #filters for year within 1952 and 2007
+  group_by(continent, year) %>% 
+  summarize_at(
+    vars(lifeExp, gdpPercap), 
+    list(~mean(.), ~median(.)))
+
+my_gap %>% 
+  filter(continent == "Asia") %>% 
+  group_by(year) %>% 
+  summarize(
+    min_lifeExp = min(lifeExp),
+    max_lifeExp = max(lifeExp)
+  )
+
+
+```
+
+###Group-Wise Summaries
+```{r, Group-Wise Summaries}
+#the "first" function of mutate uses the first value of a variable
+#within the defined group. Seems like there might be "last" or "sum"
+#There are more options (nth, first, or last). see help for nth dplyr
+
+ascending <- my_gap %>% 
+  group_by(country) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(
+    lifeExp_gain = lifeExp - first(lifeExp)
+  ) %>% 
+  filter(year < 1963)
+head(ascending, n=15)
+
+descending <- my_gap %>% 
+  arrange(country, desc(lifeExp)) %>% 
+  group_by(country) %>% 
+  select(country, year, lifeExp) %>% 
+  mutate(
+    lifeExp_gain = lifeExp - first(lifeExp) #by "desc" the first value was the largest within the country. Could have use df=ascending and last rather than first
+  ) %>% 
+  filter(year < 1963)
+head(descending, n=15)
+
+```
+
+
+
+
 
 
